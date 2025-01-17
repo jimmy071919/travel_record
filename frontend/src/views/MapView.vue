@@ -1,54 +1,59 @@
 <template>
-  <div class="h-[calc(100vh-5rem)] w-full flex flex-col">
-    <!-- 工具欄 -->
-    <div class="bg-white shadow-md w-full">
-      <div class="w-full px-8 py-4">
-        <div class="flex items-center justify-center">
-          <div class="container mx-auto flex justify-center space-x-4">
-            <div class="flex space-x-4 items-center">
-              <!-- 搜尋輸入框 -->
-              <div class="relative">
-                <input
-                  v-model="searchQuery"
-                  @keyup.enter="searchLocation"
-                  type="text"
-                  placeholder="輸入地點..."
-                  class="px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 w-64"
-                />
+  <div class="min-h-screen bg-gray-100">
+    <main class="max-w-[1400px] mx-auto px-4 py-6">
+      <!-- 工具欄 -->
+      <div class="bg-white shadow-md w-full">
+        <div class="w-full px-8 py-4">
+          <div class="flex items-center justify-center">
+            <div class="container mx-auto flex justify-center space-x-4">
+              <div class="flex space-x-4 items-center">
+                <!-- 搜尋輸入框 -->
+                <div class="relative">
+                  <input
+                    v-model="searchQuery"
+                    @keyup.enter="searchLocation"
+                    type="text"
+                    placeholder="輸入地點..."
+                    class="px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 w-64"
+                  />
+                  <button
+                    @click="searchLocation"
+                    class="absolute right-2 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600"
+                    :disabled="isSearching"
+                  >
+                    <i class="fas fa-search"></i>
+                  </button>
+                </div>
+                <!-- 添加標記按鈕 -->
                 <button
-                  @click="searchLocation"
-                  class="absolute right-2 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600"
-                  :disabled="isSearching"
+                  @click="toggleMarkerMode"
+                  :class="['px-4 py-2 rounded-lg', isAddingMarker ? 'bg-red-500 text-white' : 'bg-blue-500 text-white']"
                 >
-                  <i class="fas fa-search"></i>
+                  {{ isAddingMarker ? '取消添加' : '添加標記' }}
                 </button>
               </div>
-              <!-- 添加標記按鈕 -->
-              <button
-                @click="toggleMarkerMode"
-                :class="['px-4 py-2 rounded-lg', isAddingMarker ? 'bg-red-500 text-white' : 'bg-blue-500 text-white']"
-              >
-                {{ isAddingMarker ? '取消添加' : '添加標記' }}
-              </button>
             </div>
           </div>
         </div>
       </div>
-    </div>
 
-    <!-- 地圖容器 -->
-    <div ref="mapContainer" class="flex-1 relative"></div>
+      <!-- 地圖容器 -->
+      <div 
+        ref="mapContainer" 
+        class="w-full h-[800px] rounded-lg overflow-hidden shadow-lg"
+      ></div>
 
-    <!-- 編輯表單對話框 -->
-    <div v-if="editingMarker" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center">
-      <div class="bg-white rounded-lg p-4 max-w-lg w-full mx-4">
-        <MarkerEditForm
-          :marker="editingMarker"
-          @submit="handleMarkerSubmit"
-          @cancel="handleMarkerCancel"
-        />
+      <!-- 編輯表單對話框 -->
+      <div v-if="editingMarker" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center">
+        <div class="bg-white rounded-lg p-4 max-w-lg w-full mx-4">
+          <MarkerEditForm
+            :marker="editingMarker"
+            @submit="handleMarkerSubmit"
+            @cancel="handleMarkerCancel"
+          />
+        </div>
       </div>
-    </div>
+    </main>
   </div>
 </template>
 
