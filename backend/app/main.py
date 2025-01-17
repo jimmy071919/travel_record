@@ -2,9 +2,10 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from motor.motor_asyncio import AsyncIOMotorClient
 from fastapi.staticfiles import StaticFiles
-from .routes import travel_records
+from .routes import travel_records, records
 import os
 from dotenv import load_dotenv
+from pathlib import Path
 
 # 載入環境變數
 load_dotenv()
@@ -21,10 +22,13 @@ app.add_middleware(
 )
 
 # 掛載靜態文件服務
+uploads_dir = Path("uploads")
+uploads_dir.mkdir(exist_ok=True)
 app.mount("/uploads", StaticFiles(directory="uploads"), name="uploads")
 
 # 包含路由
 app.include_router(travel_records.router, tags=["travel_records"])
+app.include_router(records.router, prefix="/api")
 
 @app.on_event("startup")
 async def startup_db_client():
@@ -38,4 +42,4 @@ async def shutdown_db_client():
 
 @app.get("/")
 async def root():
-    return {"message": "Welcome to Travel Record API"}
+    return {"message": "Travel Record API"}

@@ -1,98 +1,93 @@
 <template>
-  <div class="min-h-screen bg-gray-100">
-    <main class="max-w-7xl mx-auto px-8 py-8">
-      <div class="flex justify-between items-center mb-8">
-        <h1 class="text-3xl font-bold text-gray-900">旅行記錄</h1>
-        <router-link 
-          to="/map" 
-          class="px-6 py-3 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors"
-        >
-          新增記錄
-        </router-link>
-      </div>
+  <div class="p-6">
+    <div class="flex justify-between items-center mb-6">
+      <h1 class="text-2xl font-bold">旅行記錄</h1>
+      <router-link 
+        to="/map" 
+        class="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 transition-colors"
+      >
+        新增記錄
+      </router-link>
+    </div>
 
-      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+    <!-- 記錄列表 -->
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+      <div 
+        v-for="record in records" 
+        :key="record.id" 
+        class="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-shadow"
+      >
         <!-- 記錄卡片 -->
-        <div 
-          v-for="record in records" 
-          :key="record.id" 
-          class="bg-white rounded-lg shadow-lg overflow-hidden group"
-        >
-          <div class="relative">
-            <img 
-              v-if="record.photo_url" 
-              :src="record.photo_url" 
-              :alt="record.location_name"
-              class="w-full h-56 object-cover"
-            >
-            <div 
-              v-else 
-              class="w-full h-56 bg-gray-200 flex items-center justify-center"
-            >
-              <span class="text-gray-400">無照片</span>
-            </div>
-            
-            <!-- 編輯和刪除按鈕 -->
-            <div class="absolute top-2 right-2 space-x-2 opacity-0 group-hover:opacity-100 transition-opacity">
-              <button 
-                @click="editRecord(record)"
-                class="px-3 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 transition-colors"
-              >
-                編輯
-              </button>
-              <button 
-                @click="deleteRecord(record.id)"
-                class="px-3 py-2 bg-red-500 text-white rounded hover:bg-red-600 transition-colors"
-              >
-                刪除
-              </button>
-            </div>
+        <div class="relative">
+          <!-- 照片 -->
+          <img 
+            v-if="record.photo_url" 
+            :src="record.photo_url" 
+            :alt="record.location_name"
+            class="w-full h-48 object-cover"
+          >
+          <div v-else class="w-full h-48 bg-gray-200 flex items-center justify-center">
+            <span class="text-gray-400">無照片</span>
           </div>
           
-          <div class="p-6">
-            <h3 class="text-xl font-semibold text-gray-900 mb-3">{{ record.location_name }}</h3>
-            <p class="text-lg text-gray-600 mb-4">{{ record.description }}</p>
-            <div class="text-sm text-gray-500">
-              <p>位置：{{ record.latitude.toFixed(6) }}, {{ record.longitude.toFixed(6) }}</p>
-              <p>時間：{{ formatDate(record.created_at) }}</p>
-            </div>
+          <!-- 編輯和刪除按鈕 -->
+          <div class="absolute top-2 right-2 space-x-2">
+            <button 
+              @click="editRecord(record)"
+              class="p-2 bg-blue-500 text-white rounded hover:bg-blue-600 transition-colors"
+            >
+              <i class="fas fa-edit"></i>
+            </button>
+            <button 
+              @click="deleteRecord(record.id)"
+              class="p-2 bg-red-500 text-white rounded hover:bg-red-600 transition-colors"
+            >
+              <i class="fas fa-trash"></i>
+            </button>
+          </div>
+        </div>
+
+        <!-- 記錄內容 -->
+        <div class="p-4">
+          <h3 class="text-xl font-semibold mb-2">{{ record.location_name }}</h3>
+          <p class="text-gray-600 mb-2">{{ record.description }}</p>
+          <div class="text-sm text-gray-500">
+            <p>位置：{{ record.latitude.toFixed(6) }}, {{ record.longitude.toFixed(6) }}</p>
+            <p>時間：{{ formatDate(record.created_at) }}</p>
           </div>
         </div>
       </div>
-    </main>
+    </div>
 
     <!-- 編輯對話框 -->
-    <div 
-      v-if="editingRecord" 
-      class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50"
-    >
+    <div v-if="editingRecord" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center">
       <div class="bg-white rounded-lg p-6 max-w-lg w-full mx-4">
-        <h2 class="text-2xl font-bold mb-6">編輯記錄</h2>
+        <h2 class="text-xl font-bold mb-4">編輯記錄</h2>
         
         <div class="space-y-4">
           <!-- 地點名稱 -->
           <div>
-            <label class="block text-sm font-medium text-gray-700 mb-1">地點名稱</label>
+            <label class="block text-sm font-medium text-gray-700">地點名稱</label>
             <input 
               v-model="editingRecord.location_name"
               type="text"
-              class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+              class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
             >
           </div>
 
           <!-- 描述 -->
           <div>
-            <label class="block text-sm font-medium text-gray-700 mb-1">描述</label>
+            <label class="block text-sm font-medium text-gray-700">描述</label>
             <textarea
               v-model="editingRecord.description"
               rows="3"
-              class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+              class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
             ></textarea>
           </div>
 
           <!-- 照片 -->
           <div>
-            <label class="block text-sm font-medium text-gray-700 mb-1">照片</label>
+            <label class="block text-sm font-medium text-gray-700">照片</label>
             <div class="mt-1 flex items-center space-x-4">
               <img 
                 v-if="editingRecord.photo_url" 
@@ -120,9 +115,8 @@
           <button 
             @click="saveEdit"
             class="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
-            :disabled="isSaving"
           >
-            {{ isSaving ? '保存中...' : '保存' }}
+            保存
           </button>
         </div>
       </div>
@@ -134,20 +128,13 @@
 import { ref, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 
-interface TravelRecord {
-  id: string
-  location_name: string
-  description: string
-  latitude: number
-  longitude: number
-  photo_url: string | null
-  created_at: string
-}
-
 const router = useRouter()
-const records = ref<TravelRecord[]>([])
-const editingRecord = ref<TravelRecord | null>(null)
-const isSaving = ref(false)
+
+// 記錄列表
+const records = ref<any[]>([])
+
+// 編輯中的記錄
+const editingRecord = ref<any>(null)
 
 // 載入記錄
 const loadRecords = async () => {
@@ -159,7 +146,6 @@ const loadRecords = async () => {
     records.value = await response.json()
   } catch (error) {
     console.error('載入記錄時發生錯誤:', error)
-    alert('載入記錄失敗')
   }
 }
 
@@ -176,7 +162,7 @@ const formatDate = (dateString: string) => {
 }
 
 // 編輯記錄
-const editRecord = (record: TravelRecord) => {
+const editRecord = (record: any) => {
   editingRecord.value = { ...record }
 }
 
@@ -211,9 +197,7 @@ const handlePhotoChange = async (event: Event) => {
       }
       
       const data = await response.json()
-      if (editingRecord.value) {
-        editingRecord.value.photo_url = data.url
-      }
+      editingRecord.value.photo_url = data.url
     } catch (error) {
       console.error('上傳照片時發生錯誤:', error)
       alert('上傳照片失敗')
@@ -223,9 +207,6 @@ const handlePhotoChange = async (event: Event) => {
 
 // 保存編輯
 const saveEdit = async () => {
-  if (!editingRecord.value) return
-  
-  isSaving.value = true
   try {
     const response = await fetch(`http://localhost:8000/records/${editingRecord.value.id}/`, {
       method: 'PUT',
@@ -240,7 +221,7 @@ const saveEdit = async () => {
     }
 
     // 更新記錄列表中的數據
-    const index = records.value.findIndex(r => r.id === editingRecord.value!.id)
+    const index = records.value.findIndex(r => r.id === editingRecord.value.id)
     if (index !== -1) {
       records.value[index] = { ...editingRecord.value }
     }
@@ -250,8 +231,6 @@ const saveEdit = async () => {
   } catch (error) {
     console.error('保存記錄時發生錯誤:', error)
     alert('保存記錄失敗')
-  } finally {
-    isSaving.value = false
   }
 }
 
